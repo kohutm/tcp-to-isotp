@@ -1,0 +1,125 @@
+# Copyright (c) 2025 N-Ix
+# SPDX-License-Identifier: Apache-2.0
+
+menu "TCP Command Handler"
+
+config TCP_CMD_HANDLER
+	bool "Enable TCP command handler"
+	depends on TCP_LINK
+	default y
+	help
+	  Enable command support for the TCP server, allowing
+	  remote control and configuration.
+
+choice
+	prompt "Log level for TCP Command Handler"
+	default TCP_CMD_HANDLER_LOG_LEVEL_INF
+	depends on TCP_CMD_HANDLER
+
+config TCP_CMD_HANDLER_LOG_LEVEL_OFF
+	bool "Off"
+config TCP_CMD_HANDLER_LOG_LEVEL_ERR
+	bool "Error"
+config TCP_CMD_HANDLER_LOG_LEVEL_WRN
+	bool "Warning"
+config TCP_CMD_HANDLER_LOG_LEVEL_INF
+	bool "Info"
+config TCP_CMD_HANDLER_LOG_LEVEL_DBG
+	bool "Debug"
+
+endchoice
+
+config TCP_CMD_HANDLER_LOG_LEVEL
+	int "TCP Command Handler log level"
+	depends on TCP_CMD_HANDLER
+	default 0 if TCP_CMD_HANDLER_LOG_LEVEL_OFF
+	default 1 if TCP_CMD_HANDLER_LOG_LEVEL_ERR
+	default 2 if TCP_CMD_HANDLER_LOG_LEVEL_WRN
+	default 3 if TCP_CMD_HANDLER_LOG_LEVEL_INF
+	default 4 if TCP_CMD_HANDLER_LOG_LEVEL_DBG
+	help
+	  Log level for the TCP Command Handler.
+
+config TCP_CMD_HANDLER_DATA_MAX_LEN
+	int "Maximum data length for TCP command handler"
+	depends on TCP_CMD_HANDLER
+	default 256
+	help
+	  Maximum length of data that can be sent with a TCP command.
+	  This is the maximum size of the data buffer
+	  used for command processing.
+
+config TCP_CMD_HANDLER_NAME_MAX_LEN
+	int "Maximum name length for TCP command handler"
+	depends on TCP_CMD_HANDLER
+	default 32
+	help
+	  Maximum length of the name that can be used for a TCP command.
+	  This is the maximum size of the name buffer used for command processing.
+
+config TCP_CMD_HANDLER_NAME_MIN_LEN
+	int "Minimum name length for TCP command handler"
+	depends on TCP_CMD_HANDLER
+	default 3
+	help
+	  Minimum length of the name that can be used for a TCP command.
+	  This is the minimum size of the name buffer
+	  used for command processing.
+
+config TCP_CMD_HANDLER_VAL_MAX_LEN
+	int "Maximum value length for TCP command handler"
+	depends on TCP_CMD_HANDLER
+	default 11
+	help
+	  Maximum length of the value that can be used for a TCP command.
+	  This is the maximum size of the value buffer
+	  used for command processing.
+	  It represents string values to be converted to integers.
+	  Default is 11 to accommodate signed 32-bit integers.
+
+config TCP_CMD_HANDLER_VAL_MIN_LEN
+	int "Minimum value length for TCP command handler"
+	depends on TCP_CMD_HANDLER
+	default 1
+	help
+	  Minimum length of the value that can be used for a TCP command.
+	  This is the minimum size of the value buffer
+	  used for command processing.
+
+config TCP_CMD_HANDLER_SPACES_MAX_LEN
+	int "Maximum spaces amount for TCP command handler"
+	depends on TCP_CMD_HANDLER
+	default 16
+	help
+	  Maximum number of spaces that can be used in a TCP command.
+	  This is the maximum size of the spaces buffer
+	  used for command processing.
+	  Note. After the data len before data should can be only the 1 space.
+	  All other signs are considered as part of the data.
+
+config TCP_CMD_HANDLER_NAME_QUANT
+	int "Maximum number of TCP commands name only type"
+	depends on TCP_CMD_HANDLER
+	default 32
+	help
+	  Maximum number of commands name type that can be registered in the TCP
+	  command handler.
+	  This is used to limit the number of commands that can be processed.
+
+config TCP_CMD_HANDLER_VAL_QUANT
+	int "Maximum number of TCP commands with value"
+	depends on TCP_CMD_HANDLER
+	default 32
+	help
+	  Maximum number of commands with name-value that can be registered
+	  in the TCP command handler.
+
+config TCP_CMD_HANDLER_DATA_QUANT
+	int "Maximum number of TCP commands with data"
+	depends on TCP_CMD_HANDLER
+	default 16
+	help
+	  Maximum number of commands with data that can be registered in the TCP
+	  command handler.
+
+endmenu
