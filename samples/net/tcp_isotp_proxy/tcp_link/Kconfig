@@ -1,0 +1,128 @@
+menu "TCP Link Configuration"
+
+config TCP_LINK
+    bool "Enable TCP Link module"
+    depends on NET_L2_ETHERNET && TX_MSG_QUEUE
+    default n
+    help
+      Enable the TCP Link module that manages shared TCP connection,
+      handles input parsing and transmits data from multiple sources.
+
+config TCP_LINK_PORT
+    int "TCP port for TCP Link server"
+    depends on TCP_LINK
+    default 4545
+    help
+      Port on which the TCP Link server listens for incoming connections.
+
+config TCP_LINK_TX_MAX_PAYLOAD_SIZE
+    int "TCP Link TX maximum payload size"
+    depends on TCP_LINK
+    default 512
+    help
+      Maximum size of the payload for TCP Link in bytes.
+      This buffer is used to store outgoing messages before they are sent.
+
+config TCP_LINK_RX_BUFFER_SIZE
+    int "TCP Link RX buffer size"
+    depends on TCP_LINK
+    default 512
+    help
+      Size of the receive buffer for TCP Link in bytes.
+      This buffer is used to store incoming messages before they are processed.
+
+config TCP_LINK_RX_THREAD_NAME
+    string "TCP Link RX thread name"
+    depends on TCP_LINK
+    default "tcp_link_rx_thread"
+    help
+      Name of the thread that handles receiving TCP data.
+
+config TCP_LINK_RX_THREAD_STACK_SIZE
+    int "TCP Link RX thread stack size"
+    depends on TCP_LINK
+    default 2048
+    help
+      Stack size (in bytes) for the thread receiving TCP data.
+
+config TCP_LINK_RX_THREAD_PRIO
+    int "TCP Link RX thread priority"
+    depends on TCP_LINK
+    default 3
+    help
+      Priority of the thread for TCP Link RX.
+
+config TCP_LINK_MAX_CLIENTS
+    int "Maximum simultaneous TCP clients"
+    depends on TCP_LINK
+    default 1
+    help
+      Maximum number of simultaneous TCP clients.
+      Set to 1 if the server is intended for a single client only.
+
+config TCP_LINK_TX_QUEUE_NAME
+    string "TCP link TX queue name"
+    default "tcp_link_tx_queue"
+    depends on TCP_LINK
+    help
+      Queue name for internal TCP link transmission.
+
+config TCP_LINK_TX_SRC_ID
+    int "TCP Link TX source ID"
+    depends on TCP_LINK && TX_MSG_QUEUE
+    default 255
+    help
+      Name of the sender for TCP Link messages.
+
+config TCP_LINK_TX_DST_ID
+    int "TCP Link TX destination ID"
+    depends on TCP_LINK && TX_MSG_QUEUE
+    default 255
+    help
+      Name of the destination for TCP Link messages.
+
+config TCP_LINK_TX_USE_SEND_TIMEOUT
+    bool "Enable TCP Link TX send timeout"
+    depends on TCP_LINK
+    default y
+    help
+      Enable the use of send timeout for TCP Link TX operations.
+
+config TCP_LINK_TX_SEND_TIMEOUT
+    int "TCP Link TX send timeout"
+    depends on TCP_LINK && TCP_LINK_TX_USE_SEND_TIMEOUT
+    default 100
+    help
+      Timeout in milliseconds for sending messages over TCP Link.
+      This is the maximum time to wait for a message to be sent.
+
+choice
+    prompt "Log level for TCP Link"
+    default TCP_LINK_LOG_LEVEL_INF
+    depends on TCP_LINK
+
+config TCP_LINK_LOG_LEVEL_OFF
+    bool "Off"
+config TCP_LINK_LOG_LEVEL_ERR
+    bool "Error"
+config TCP_LINK_LOG_LEVEL_WRN
+    bool "Warning"
+config TCP_LINK_LOG_LEVEL_INF
+    bool "Info"
+config TCP_LINK_LOG_LEVEL_DBG
+    bool "Debug"
+
+endchoice
+
+config TCP_LINK_LOG_LEVEL
+    int "Log level for TCP Link"
+    depends on TCP_LINK
+    default  0 if TCP_LINK_LOG_LEVEL_OFF
+    default  1 if TCP_LINK_LOG_LEVEL_ERR
+    default  2 if TCP_LINK_LOG_LEVEL_WRN
+    default  3 if TCP_LINK_LOG_LEVEL_INF
+    default  4 if TCP_LINK_LOG_LEVEL_DBG
+    help
+      Logging level for the TCP Link module.
+
+endmenu

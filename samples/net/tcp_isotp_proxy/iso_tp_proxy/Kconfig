@@ -1,0 +1,170 @@
+menu "ISO-TP Proxy Configuration"
+
+config CAN_ISOTP_PROXY
+    bool "Enable ISO-TP proxy support"
+    depends on TCP_LINK && ISOTP
+    default n
+    help
+      Enable ISO-TP proxy functionality to forward CAN messages over TCP.
+      This is useful for applications that need to bridge CAN and TCP networks.
+      It allows the TCP server to handle ISO-TP messages and forward them to the
+      CAN bus.
+      This is particularly useful in automotive and industrial applications
+      where CAN networks are prevalent.
+
+config CAN_ISOTP_PROXY_RX_THREAD_NAME
+    string "ISO-TP RX thread name"
+    depends on CAN_ISOTP_PROXY
+    default "isotp_rx_thread"
+    help
+      Name of the thread that handles receiving ISO-TP messages over CAN.
+
+config CAN_ISOTP_PROXY_TX_ID
+    hex "ISO-TP TX CAN ID"
+    depends on CAN_ISOTP_PROXY
+    default 0x180
+    help
+      Default CAN ID used for transmitting ISO-TP messages.
+
+config CAN_ISOTP_PROXY_RX_ID
+    hex "ISO-TP RX CAN ID"
+    depends on CAN_ISOTP_PROXY
+    default 0x80
+    help
+      Default CAN ID used for receiving ISO-TP messages.
+
+config CAN_ISOTP_PROXY_TCP_LINK_TX_SRC_ID
+    int "TCP Link TX source ID"
+    depends on CAN_ISOTP_PROXY
+    default 16435
+    help
+      Source ID for TCP Link messages sent over ISO-TP.
+      This is used to identify the sender of the messages.
+
+config CAN_ISOTP_PROXY_TCP_LINK_TX_DST_ID
+    int "TCP Link TX destination ID"
+    depends on CAN_ISOTP_PROXY
+    default 16435
+    help
+      Destination ID for TCP Link messages sent over ISO-TP.
+      This is used to identify the intended recipient of the messages.
+
+config CAN_ISOTP_PROXY_TX_QUEUE_NAME
+    string "CAN ISOTP TX queue name"
+    default "can_isotp_tx_queue"
+    depends on CAN_ISOTP_PROXY
+    help
+      Queue name for CAN ISOTP transmission.
+
+config CAN_ISOTP_PROXY_MAX_PAYLOAD_SIZE
+    int "ISO-TP maximum payload size"
+    depends on CAN_ISOTP_PROXY
+    default 256
+    help
+      Maximum payload size for ISO-TP messages in bytes.
+      This should match the expected payload size of the messages being transmitted.
+
+config CAN_ISOTP_PROXY_FC_BC
+    int "Block Size for Flow Control"
+    depends on CAN_ISOTP_PROXY
+    default 8
+    help
+      Block size for flow control in ISO-TP messages.
+      This defines how many consecutive frames can be sent before
+      waiting for a flow control frame.
+
+config CAN_ISOTP_PROXY_FC_STMIN
+    int "Separation Time for Flow Control"
+    depends on CAN_ISOTP_PROXY
+    default 0
+    help
+      Separation time in milliseconds for flow control frames.
+      This is the time to wait before sending the next frame after a flow control frame.
+
+config CAN_ISOTP_PROXY_CAN_FD
+    bool "Enable CAN FD support"
+    depends on CAN_ISOTP_PROXY
+    default n
+    help
+      Enable CAN FD (Flexible Data-rate) support for the ISO-TP proxy.
+      This allows for larger payloads and faster data rates when using
+      CAN FD capable hardware.
+
+config CAN_ISOTP_PROXY_LOOPBACK
+    bool "Use CAN controller loopback mode"
+    depends on CAN_ISOTP_PROXY
+    default n
+    help
+      Enables internal loopback mode of the CAN controller.
+      Useful for testing without physical CAN transceivers.
+
+config CAN_ISOTP_PROXY_RECV_TIMEOUT_MS
+    int "ISO-TP RX receive timeout"
+    depends on CAN_ISOTP_PROXY
+    default 2000
+    help
+      Timeout in milliseconds for receiving messages over ISO-TP.
+      This is the maximum time to wait for a message to be received before
+      giving up.
+
+config CAN_ISOTP_PROXY_ISOTP_TX_USE_SEND_TIMEOUT
+    bool "Enable ISO-TP TX send timeout"
+    depends on CAN_ISOTP_PROXY
+    default y
+    help
+      Enable the use of send timeout for ISO-TP TX operations.
+      This allows the system to wait for a specified time before retrying
+      to send a message if the previous attempt failed.
+
+config CAN_ISOTP_PROXY_ISOTP_TX_TIMEOUT
+    int "ISO-TP TX send timeout"
+    depends on CAN_ISOTP_PROXY && CAN_ISOTP_PROXY_ISOTP_TX_USE_SEND_TIMEOUT
+    default 100
+    help
+      Timeout in milliseconds for sending messages over ISO-TP.
+      This is the maximum time to wait for a message to be sent before retrying.
+
+config CAN_ISOTP_PROXY_RX_STACK_SIZE
+    int "ISO-TP RX thread stack size"
+    depends on CAN_ISOTP_PROXY
+    default 1024
+    help
+      Stack size in bytes for the ISO-TP receive thread.
+
+config CAN_ISOTP_PROXY_RX_THREAD_PRIO
+    int "ISO-TP RX thread priority"
+    depends on CAN_ISOTP_PROXY
+    default 4
+    help
+      Thread priority for ISO-TP receive thread.
+
+choice
+    prompt "Log level for CAN ISOTP Proxy"
+    default CAN_ISOTP_PROXY_LOG_LEVEL_INF
+    depends on CAN_ISOTP_PROXY
+
+config CAN_ISOTP_PROXY_LOG_LEVEL_OFF
+    bool "Off"
+config CAN_ISOTP_PROXY_LOG_LEVEL_ERR
+    bool "Error"
+config CAN_ISOTP_PROXY_LOG_LEVEL_WRN
+    bool "Warning"
+config CAN_ISOTP_PROXY_LOG_LEVEL_INF
+    bool "Info"
+config CAN_ISOTP_PROXY_LOG_LEVEL_DBG
+    bool "Debug"
+
+endchoice
+
+config CAN_ISOTP_PROXY_LOG_LEVEL
+    int "CAN ISOTP Proxy log level"
+    depends on CAN_ISOTP_PROXY
+    default 0 if CAN_ISOTP_PROXY_LOG_LEVEL_OFF
+    default 1 if CAN_ISOTP_PROXY_LOG_LEVEL_ERR
+    default 2 if CAN_ISOTP_PROXY_LOG_LEVEL_WRN
+    default 3 if CAN_ISOTP_PROXY_LOG_LEVEL_INF
+    default 4 if CAN_ISOTP_PROXY_LOG_LEVEL_DBG
+    help
+      Log level for the CAN ISOTP Proxy.
+
+endmenu

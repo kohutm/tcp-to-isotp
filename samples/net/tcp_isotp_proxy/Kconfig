@@ -1,0 +1,8 @@
+mainmenu "My TCP Server App"
+
+source "Kconfig.zephyr"
+
+rsource "tx_queue/Kconfig"
+rsource "tcp_link/Kconfig"
+rsource "iso_tp_proxy/Kconfig"
+rsource "tcp_cmd_handler/Kconfig"
