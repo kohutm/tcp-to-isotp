@@ -1,0 +1,98 @@
+# Copyright (c) 2025 N-Ix
+# SPDX-License-Identifier: Apache-2.0
+
+menu "TX Queue Configuration"
+
+config TX_MSG_QUEUE
+	bool "Enable message transmit queue"
+	default n
+	help
+	  Enable a dedicated thread for handling message transmit queues.
+	  This allows for better management of outgoing messages and can
+	  improve performance.
+
+choice
+	prompt "Log level for TX message queue"
+	default TX_MSG_QUEUE_LOG_LEVEL_INF
+	depends on TX_MSG_QUEUE
+
+config TX_MSG_QUEUE_LOG_LEVEL_OFF
+	bool "Off"
+config TX_MSG_QUEUE_LOG_LEVEL_ERR
+	bool "Error"
+config TX_MSG_QUEUE_LOG_LEVEL_WRN
+	bool "Warning"
+config TX_MSG_QUEUE_LOG_LEVEL_INF
+	bool "Info"
+config TX_MSG_QUEUE_LOG_LEVEL_DBG
+	bool "Debug"
+
+endchoice
+
+config TX_MSG_QUEUE_LOG_LEVEL
+	int "TX message queue log level"
+	depends on TX_MSG_QUEUE
+	default 0 if TX_MSG_QUEUE_LOG_LEVEL_OFF
+	default 1 if TX_MSG_QUEUE_LOG_LEVEL_ERR
+	default 2 if TX_MSG_QUEUE_LOG_LEVEL_WRN
+	default 3 if TX_MSG_QUEUE_LOG_LEVEL_INF
+	default 4 if TX_MSG_QUEUE_LOG_LEVEL_DBG
+	help
+	  Log level for the TX message queue.
+
+config TX_MSG_QUEUE_THREAD_NAME
+	string "TX message queue thread name"
+	depends on TX_MSG_QUEUE
+	default "tx_msg_queue_thread"
+	help
+	  Default name for the TX message queue.
+	  This is used for identifying the queue in logs and debugging.
+
+config TX_MSG_QUEUE_MAX_NAME_LEN
+	int "TX message queue max name length"
+	depends on TX_MSG_QUEUE
+	default 32
+	help
+	  Maximum length of the name for the message transmit queue.
+	  This is used for identifying the queue in logs and debugging.
+
+config TX_MSG_QUEUE_MAX_QUANTITY
+	int "TX message queue maximum quantity"
+	depends on TX_MSG_QUEUE
+	default 4
+	help
+	  Maximum number of queues.
+	  This helps manage memory usage and ensures that the queue number is restricted.
+
+config TX_MSG_QUEUE_PAYLOAD_MAX_SIZE
+	int "TX message queue maximum payload size"
+	depends on TX_MSG_QUEUE
+	default 256
+	help
+	  Maximum size of the TX message queue payload in bytes.
+	  This limits the amount of memory used for the queue and prevents excessive memory usage.
+	  If the queue exceeds this size, packets may be dropped or delayed.
+
+config TX_MSG_QUEUE_DEPTH
+	int "TX message queue depth"
+	depends on TX_MSG_QUEUE
+	default 10
+	help
+	  Maximum number of packets that can be queued for transmission in the TX message queue.
+	  This helps manage memory usage and ensures that the queue does not grow indefinitely.
+
+config TX_MSG_QUEUE_THREAD_STACK_SIZE
+	int "TX message queue thread stack size"
+	depends on TX_MSG_QUEUE
+	default 1024
+	help
+	  Stack size in bytes for the TX message queue thread.
+
+config TX_MSG_QUEUE_THREAD_PRIO
+	int "TX message queue thread priority"
+	depends on TX_MSG_QUEUE
+	default 3
+	help
+	  Thread priority for the TCP transmit queue thread.
+
+endmenu
