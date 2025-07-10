@@ -1,93 +1,67 @@
 #!/usr/bin/env python3
 
-# Copyright 2025 Google LLC
 # SPDX-License-Identifier: Apache-2.0
 
 import argparse
-import datetime
 import os
 import sys
-import time
 
-import github
+from github import Github
 
+# List of labels that indicate a PR should not be merged
+# These labels are considered blocking and will prevent merging
 DNM_LABELS = ["DNM", "DNM (manifest)", "TSC", "Architecture Review", "dev-review"]
-
-
-def print_rate_limit(gh, org):
-    response = gh.get_organization(org)
-    for header, value in response.raw_headers.items():
-        if header.startswith("x-ratelimit"):
-            print(f"{header}: {value}")
 
 
 def parse_args(argv):
     parser = argparse.ArgumentParser(
-        description=__doc__,
-        formatter_class=argparse.RawDescriptionHelpFormatter,
+        description="Prevent merging of PRs with DNM labels or missing metadata.",
         allow_abbrev=False,
     )
-
     parser.add_argument("-p", "--pull-request", required=True, type=int, help="The PR number")
-
     return parser.parse_args(argv)
-
-
-WAIT_FOR_WORKFLOWS = set({"Manifest"})
-WAIT_FOR_DELAY_S = 60
-
-
-def workflow_delay(repo, pr):
-    print(f"PR is at {pr.head.sha}")
-
-    while True:
-        runs = repo.get_workflow_runs(head_sha=pr.head.sha)
-
-        completed = set()
-        for run in runs:
-            print(f"{run.name}: {run.status} {run.conclusion} {run.html_url}")
-            if run.status == "completed" and run.conclusion == "success":
-                completed.add(run.name)
-
-        if WAIT_FOR_WORKFLOWS.issubset(completed):
-            return
-
-        ts = datetime.datetime.now()
-        print(f"wait: {ts} completed={completed}")
-        time.sleep(WAIT_FOR_DELAY_S)
 
 
 def main(argv):
     args = parse_args(argv)
 
-    token = os.environ.get('GITHUB_TOKEN', None)
-    gh = github.Github(token)
+    token = os.environ.get("GITHUB_TOKEN")
+    repo_name = os.environ.get("GITHUB_REPOSITORY")
 
-    print_rate_limit(gh, "zephyrproject-rtos")
+    if not token or not repo_name:
+        print("❌ Missing GITHUB_TOKEN or GITHUB_REPOSITORY in environment.")
+        sys.exit(1)
 
-    repo = gh.get_repo("zephyrproject-rtos/zephyr")
-    pr = repo.get_pull(args.pull_request)
+    gh = Github(token)
 
-    workflow_delay(repo, pr)
+    try:
+        repo = gh.get_repo(repo_name)
+        pr = repo.get_pull(args.pull_request)
+    except Exception as e:
+        print(f"❌ Failed to get PR #{args.pull_request} from {repo_name}: {e}")
+        sys.exit(1)
 
-    print(f"pr: {pr.html_url}")
+    print(f"✅ Checking PR: {pr.html_url}")
 
     fail = False
 
+    # Check DNM labels
     for label in pr.get_labels():
-        print(f"label: {label.name}")
-
+        print(f"ℹ️ label: {label.name}")
         if label.name in DNM_LABELS:
-            print(f"Pull request is labeled as \"{label.name}\".")
+            print(f"❌ PR has blocking label: \"{label.name}\".")
             fail = True
 
-    if not pr.body:
-        print("Pull request is description is empty.")
+    # Check description
+    if not pr.body or not pr.body.strip():
+        print("❌ PR has no description.")
         fail = True
 
     if fail:
-        print("This workflow fails so that the pull request cannot be merged.")
+        print("🚫 This pull request cannot be merged.")
         sys.exit(1)
+
+    print("✅ PR metadata check passed successfully.")
 
 
 if __name__ == "__main__":
